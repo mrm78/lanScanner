@@ -1,27 +1,32 @@
 from ip_scanner import scan_ips
 from port_scanner import scan_ports
 from time import time
+import threading
+from multiprocessing.pool import ThreadPool
+
 
 
 # find ips in lan
 print('start scanning LAN...')
 start = time()
-ips = scan_ips(start='172.18.220.0', end='172.18.223.255')
+ips = scan_ips(start='192.168.43.0', end='192.168.43.255')
 end = time()
 
 
-# choose ip to find open ports
-for i,ip in enumerate(ips):
-    print(f'{i+1}: {ip}')
 print(f'found {len(ips)} ips in {int(end-start)}s.')
-ip_index = input('select one of them to find open ports: ')
+print('--------------------------------------------' )
+print('scan ports for found IPs...')
 
 
-# find ports for selected addr
-print('-' * 20)
-print('srat scanning ports...')
+# scan all ips
+pool = ThreadPool(processes=len(ips))
 start = time()
-ports = scan_ports(ips[int(ip_index)-1])
+ip_ports = {ip:pool.apply_async(scan_ports, (ip, )).get() for ip in ips}
 end = time()
-print(f'found {len(ports)} ports for ip={ip} in {int(end-start)}s:')
-print(', '.join([str(p) for p in ports]))
+
+
+for i,ip in enumerate(ip_ports):
+    ports = ', '.join([str(p) for p in ip_ports[ip]])
+    print(f'{i+1}:\t {ip}\t => {ports}')
+    
+print(f'scanned in {int(end-start)}s')

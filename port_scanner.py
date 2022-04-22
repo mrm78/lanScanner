@@ -3,11 +3,9 @@ import pyfiglet
 import socket
 import threading
 
-ports_batches = [range(i, min(i+100, 65535)) for i in range(1, 65535, 500)]
-open_ports = []
 
-def port_scanner_thread(ip, lock):
-    global ports_batches, open_ports
+
+def port_scanner_thread(ip, ports_batches, open_ports, lock):
     ascii_banner = pyfiglet.figlet_format("PORT SCANNER")
 
     while len(ports_batches) != 0:
@@ -33,8 +31,10 @@ def port_scanner_thread(ip, lock):
 
 
 def scan_ports(ip):
+    ports_batches = [range(i, min(i+100, 65535)) for i in range(1, 65535, 500)]
+    open_ports = []
     lock = threading.Lock()
-    threads = [threading.Thread(target=port_scanner_thread, args=(ip, lock)) for t in range(100)]
+    threads = [threading.Thread(target=port_scanner_thread, args=(ip, ports_batches, open_ports, lock)) for t in range(100)]
     for t in threads:
         t.start()
     for t in threads:
