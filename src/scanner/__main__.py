@@ -35,7 +35,8 @@ if __name__ == '__main__':
     print('scan ports for found IPs...')
     pool = ThreadPool(processes=len(ips))
     start_t = time()
-    ip_ports = {ip: pool.apply_async(scan_ports, (ip, )).get() for ip in ips}
+    procs = {ip: pool.apply_async(scan_ports, (ip, )) for ip in ips}
+    ip_ports = {ip:proc.get() for ip,proc in procs.items()}
     end_t = time()
 
 
