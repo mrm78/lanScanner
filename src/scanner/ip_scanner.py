@@ -1,7 +1,6 @@
 import os
-from utils import *
+from .utils import *
 import threading
-from time import time
 
 
 
